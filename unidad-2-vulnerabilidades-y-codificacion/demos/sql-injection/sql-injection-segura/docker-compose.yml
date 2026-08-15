@@ -1,0 +1,50 @@
+name: sql-injection-segura
+
+services:
+  web:
+    build: .
+    container_name: sql-injection-segura
+    ports:
+      - "8802:8802"
+    environment:
+      DB_HOST: db
+      DB_USER: app_user
+      DB_PASSWORD: app_password
+      DB_NAME: biblioteca
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.4
+    container_name: sql-injection-segura-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: biblioteca
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_password
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - sqli_segura_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    container_name: sql-injection-segura-phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_USER: app_user
+      PMA_PASSWORD: app_password
+    ports:
+      - "8824:80"   # http://localhost:8824
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  sqli_segura_mysql_data:

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Biblioteca UM - Iniciar sesión</title>
+<link rel="stylesheet" href="/static/estilo.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <a class="marca" href="/"><span class="icono">📚</span> Biblioteca UM</a>
+  <nav class="nav-links">
+    <a href="/" class="activo">Inicio</a>
+    <a href="/buscar">Catálogo</a>
+    <a href="/dashboard">Mi cuenta</a>
+  </nav>
+</header>
+
+<main>
+  <section class="card login-wrap">
+    <div class="icono-grande">🔐</div>
+    <h1>Bienvenido de nuevo</h1>
+    <p class="subt">Inicia sesión para gestionar tus préstamos.</p>
+    <form onsubmit="event.preventDefault(); hacerLogin();">
+      <label for="login-username">Usuario</label>
+      <input type="text" id="login-username" autocomplete="username" />
+      <label for="login-password">Contraseña</label>
+      <input type="password" id="login-password" autocomplete="current-password" />
+      <button class="primario" type="submit">Iniciar sesión</button>
+    </form>
+    <p class="mensaje-error" id="login-error"></p>
+    <p class="mensaje-exito" id="login-exito"></p>
+    <details class="panel-respuesta">
+      <summary>Respuesta del servidor</summary>
+      <pre id="login-resultado">(sin peticiones aún)</pre>
+    </details>
+  </section>
+</main>
+
+<footer class="pie">Biblioteca Universidad de Manizales — uso interno</footer>
+
+<script>
+  async function hacerLogin() {
+    const username = document.getElementById("login-username").value;
+    const password = document.getElementById("login-password").value;
+    const salida = document.getElementById("login-resultado");
+    const error = document.getElementById("login-error");
+    const exito = document.getElementById("login-exito");
+    error.classList.remove("visible");
+    exito.classList.remove("visible");
+    salida.textContent = "Enviando...";
+    try {
+      const resp = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const datos = await resp.json();
+      salida.textContent = JSON.stringify(datos, null, 2);
+      if (datos.ok) {
+        sessionStorage.setItem("sesion", JSON.stringify({ usuario: datos.usuario, respuesta: datos }));
+        exito.textContent = "Sesión iniciada como " + datos.usuario.username + ". Redirigiendo a tu cuenta...";
+        exito.classList.add("visible");
+        setTimeout(() => { window.location.href = "/dashboard"; }, 900);
+      } else {
+        error.textContent = datos.mensaje || "No se pudo iniciar sesión.";
+        error.classList.add("visible");
+      }
+    } catch (err) {
+      salida.textContent = "Error de red: " + err;
+      error.textContent = "No se pudo contactar al servidor.";
+      error.classList.add("visible");
+    }
+  }
+</script>
+
+</body>
+</html>

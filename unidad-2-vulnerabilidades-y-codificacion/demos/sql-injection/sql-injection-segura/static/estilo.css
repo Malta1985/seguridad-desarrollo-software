@@ -1,0 +1,121 @@
+:root{
+  --bg:#f6f8fa;
+  --surface:#ffffff;
+  --primary:#073b36; /* deep teal */
+  --primary-700:#052a24;
+  --accent:#0ea5a4; /* teal */
+  --accent-weak:#e6f7f5;
+  --danger:#b3261e;
+  --danger-weak:#fdecea;
+  --muted:#6b7280;
+  --border:#e6eaee;
+  --radius:10px;
+  --shadow-sm:0 1px 4px rgba(7,59,54,0.06);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  background:linear-gradient(180deg,#fbfdfe 0%,var(--bg) 100%);
+  color:var(--primary-700);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  min-height:100vh;display:flex;flex-direction:column;
+}
+
+header.topbar{background:var(--surface);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border)}
+.marca{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1rem;color:var(--primary)}
+.marca .icono{font-size:1.3rem}
+nav.nav-links{display:flex;gap:14px}
+nav.nav-links a{color:var(--muted);text-decoration:none;font-size:0.95rem;font-weight:600;padding:8px;border-radius:8px}
+nav.nav-links a:hover,nav.nav-links a.activo{background:var(--accent-weak);color:var(--primary)}
+
+main{flex:1;width:100%;max-width:1100px;margin:0 auto;padding:36px 20px 60px}
+
+footer.pie{padding:16px;text-align:center;font-size:0.85rem;color:var(--muted);border-top:1px solid var(--border);background:transparent}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px}
+
+label{display:block;font-size:0.92rem;margin:10px 0 6px;color:var(--primary)}
+input[type=text],input[type=password],input[type=email],textarea,select{width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:0.95rem;background:linear-gradient(180deg,#fff,#fbffff)}
+input:focus,textarea:focus,select:focus{outline:3px solid rgba(14,165,164,0.12);border-color:var(--accent)}
+
+button{cursor:pointer;border:none;border-radius:10px;padding:10px 14px;font-weight:700}
+button.primario{background:var(--accent);color:white}
+button.primario:hover{filter:brightness(0.98)}
+button.ghost{background:transparent;border:1px solid var(--border);color:var(--primary)}
+
+.opcion-validacion{display:flex;align-items:flex-start;gap:8px;margin:14px 0 4px;font-size:0.9rem;font-weight:400;color:var(--muted);cursor:pointer}
+.opcion-validacion input[type=checkbox]{margin-top:3px;cursor:pointer}
+.opcion-validacion .nota-ilustrativa{display:block;font-size:0.82rem;font-style:italic;color:var(--muted)}
+
+.mensaje-error{background:var(--danger-weak);color:var(--danger);border-radius:8px;padding:10px 12px;font-size:0.9rem;margin-top:12px;display:none}
+.mensaje-error.visible{display:block}
+.mensaje-exito{background:#e6fbf6;color:#0b6b59;border-radius:8px;padding:10px 12px;font-size:0.9rem;margin-top:12px;display:none}
+.mensaje-exito.visible{display:block}
+
+/* --- Panel de respuesta cruda (colapsable, para inspeccionar en clase) --- */
+details.panel-respuesta{margin-top:16px;font-size:0.88rem}
+details.panel-respuesta summary{cursor:pointer;color:var(--muted);font-weight:700}
+details.panel-respuesta pre{background:#071027;color:#d6e8ff;padding:12px;border-radius:8px;overflow:auto;margin-top:8px;white-space:pre-wrap}
+
+/* --- Pagina de login --- */
+.login-wrap{max-width:420px;margin:36px auto;padding:28px;text-align:center}
+.login-wrap .icono-grande{font-size:2rem}
+.login-wrap h1{font-size:1.35rem;margin:8px 0}
+.login-wrap p.subt{color:var(--muted);font-size:0.92rem;margin-bottom:8px}
+.login-wrap form{text-align:left;margin-top:18px}
+
+.campo-password{position:relative}
+.campo-password input{padding-right:44px}
+.boton-ojo{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;border-radius:6px;cursor:pointer;font-size:1.05rem;padding:6px 8px;line-height:1;color:var(--muted)}
+.boton-ojo:hover{color:var(--primary-700);background:var(--bg)}
+
+.registro-wrap{max-width:560px;margin:36px auto;padding:28px;text-align:center}
+.registro-wrap .icono-grande{font-size:2rem}
+.registro-wrap h1{font-size:1.35rem;margin:8px 0}
+.registro-wrap p.subt{color:var(--muted);font-size:0.92rem;margin-bottom:8px}
+.registro-wrap form{text-align:left;margin-top:18px}
+
+.pasos-hash{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.pasos-hash li{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px}
+.pasos-hash li.paso-destacado{border-color:var(--accent);background:var(--accent-weak)}
+.pasos-hash li.paso-leyenda{border-style:dashed;background:transparent}
+.pasos-hash li.paso-leyenda .paso-valor{font-style:italic;color:var(--muted);white-space:pre-line}
+.paso-label{display:block;font-size:0.82rem;font-weight:700;color:var(--muted);margin-bottom:6px}
+.paso-valor{display:block;font-family:Consolas, "Courier New", monospace;font-size:0.9rem;word-break:break-all;color:var(--primary-700)}
+.pasos-nota{font-size:0.9rem;color:var(--muted);font-style:italic;margin:10px 0 0}
+
+/* --- Pagina de catalogo/busqueda --- */
+.hero-busqueda{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px}
+.hero-busqueda h1{margin:0 0 6px;font-size:1.25rem}
+.hero-busqueda p.subt{color:var(--muted);font-size:0.92rem;margin:0 0 12px}
+.fila-busqueda{display:flex;gap:10px}
+.fila-busqueda input{flex:1}
+.fila-busqueda button{white-space:nowrap}
+
+.grid-libros{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:6px}
+.libro{padding:14px;display:flex;flex-direction:column;gap:8px}
+.libro .portada{height:90px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--primary-700));color:white;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:6px}
+.libro h3{margin:0;font-size:1rem;line-height:1.25}
+.libro .autor{color:var(--muted);font-size:0.87rem}
+.libro .meta{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.libro .anio{font-size:0.8rem;color:var(--muted)}
+.badge-disp{font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:999px}
+.badge-disp.si{background:var(--accent-weak);color:#0b6b59}
+.badge-disp.no{background:var(--danger-weak);color:var(--danger)}
+
+.sin-resultados{grid-column:1/-1;text-align:center;color:var(--muted);padding:28px 0;font-size:0.95rem}
+
+/* --- Pagina de cuenta (dashboard tras login) --- */
+.bienvenida{max-width:460px;margin:36px auto;padding:30px;text-align:center}
+.bienvenida .avatar-grande{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-700));color:white;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin:0 auto 14px}
+.bienvenida h1{font-size:1.3rem;margin:0 0 6px}.bienvenida p.subt{color:var(--muted);font-size:0.92rem;margin-bottom:6px}.bienvenida .id-usuario{color:var(--muted);font-size:0.85rem}
+.acciones-dashboard{display:flex;gap:10px;margin-top:20px}
+.acciones-dashboard a.primario,.acciones-dashboard button.secundario{flex:1;text-align:center;text-decoration:none}
+a.primario{display:inline-block;background:var(--accent);color:white;border-radius:10px;padding:10px 16px;font-size:0.95rem;font-weight:700}
+a.primario:hover{filter:brightness(0.98)}
+button.secundario{background:transparent;color:var(--primary);border:1px solid var(--border);padding:9px 14px;border-radius:10px}
+button.secundario:hover{background:var(--surface)}

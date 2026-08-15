@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Biblioteca UM - Catálogo</title>
+<link rel="stylesheet" href="/static/estilo.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <a class="marca" href="/"><span class="icono">📚</span> Biblioteca UM</a>
+  <nav class="nav-links">
+    <a href="/">Inicio</a>
+    <a href="/registro">Registro</a>
+    <a href="/buscar" class="activo">Catálogo</a>
+    <a href="/dashboard">Mi cuenta</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero-busqueda">
+    <h1>Catálogo de la biblioteca</h1>
+    <p class="subt">Busca por título o explora el catálogo completo.</p>
+    <div class="fila-busqueda">
+      <input type="text" id="buscar-titulo" placeholder="Buscar por título..." maxlength="100"
+             onkeydown="if (event.key === 'Enter') hacerBusqueda();" />
+      <button class="primario" style="margin-top:0; width:auto;" onclick="hacerBusqueda()">Buscar</button>
+    </div>
+    <label class="opcion-validacion" for="validar-cliente">
+      <input type="checkbox" id="validar-cliente" checked />
+      <span>Validar formato del título en el navegador antes de enviar
+        <span class="nota-ilustrativa">(ilustrativo — el servidor valida siempre el formato, incluso con esto desactivado)</span>
+      </span>
+    </label>
+    <p class="mensaje-error" id="buscar-error"></p>
+    <details class="panel-respuesta">
+      <summary>Respuesta del servidor</summary>
+      <pre id="buscar-resultado">(sin peticiones aún)</pre>
+    </details>
+  </section>
+
+  <div class="grid-libros" id="grid-libros"></div>
+</main>
+
+<footer class="pie">Biblioteca Universidad de Manizales — uso interno</footer>
+
+<script>
+  function pintarLibros(libros) {
+    const grid = document.getElementById("grid-libros");
+    grid.innerHTML = "";
+    if (!libros || libros.length === 0) {
+      grid.innerHTML = '<p class="sin-resultados">No se encontraron libros.</p>';
+      return;
+    }
+    for (const libro of libros) {
+      const tarjeta = document.createElement("div");
+      tarjeta.className = "card libro";
+      const disponible = libro.disponible !== false;
+      tarjeta.innerHTML =
+        '<div class="portada">📖</div>' +
+        "<h3>" + libro.titulo + "</h3>" +
+        '<div class="autor">' + libro.autor + "</div>" +
+        '<div class="meta">' +
+        '<span class="anio">' + (libro.anio ?? "") + "</span>" +
+        '<span class="badge-disp ' + (disponible ? "si" : "no") + '">' +
+        (disponible ? "Disponible" : "Prestado") + "</span>" +
+        "</div>";
+      grid.appendChild(tarjeta);
+    }
+  }
+
+  const ALLOWLIST_TITULO = /^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ0-9 ,.:-]*$/;
+
+  async function hacerBusqueda() {
+    const titulo = document.getElementById("buscar-titulo").value;
+    const validarEnCliente = document.getElementById("validar-cliente").checked;
+    const salida = document.getElementById("buscar-resultado");
+    const error = document.getElementById("buscar-error");
+    error.classList.remove("visible");
+
+    if (validarEnCliente && !ALLOWLIST_TITULO.test(titulo)) {
+      error.textContent = "Formato de búsqueda inválido (solo letras, números, espacio y puntuación básica). Nada se envió al servidor.";
+      error.classList.add("visible");
+      salida.textContent = "(bloqueado en el navegador — no se hizo ninguna petición; desmarca la casilla de arriba para ver qué hace el servidor con el mismo valor)";
+      return;
+    }
+
+    salida.textContent = "Enviando...";
+    try {
+      const url = "/api/buscar?titulo=" + encodeURIComponent(titulo);
+      const resp = await fetch(url);
+      const datos = await resp.json();
+      salida.textContent = JSON.stringify(datos, null, 2);
+      pintarLibros(datos.resultados);
+    } catch (err) {
+      salida.textContent = "Error de red: " + err;
+    }
+  }
+
+  async function cargarCatalogo() {
+    const resp = await fetch("/api/libros");
+    const datos = await resp.json();
+    pintarLibros(datos.resultados);
+  }
+
+  cargarCatalogo();
+</script>
+
+</body>
+</html>

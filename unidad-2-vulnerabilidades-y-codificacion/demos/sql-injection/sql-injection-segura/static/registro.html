@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Biblioteca UM - Registro</title>
+<link rel="stylesheet" href="/static/estilo.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <a class="marca" href="/"><span class="icono">📚</span> Biblioteca UM</a>
+  <nav class="nav-links">
+    <a href="/">Inicio</a>
+    <a href="/registro" class="activo">Registro</a>
+    <a href="/buscar">Catálogo</a>
+    <a href="/dashboard">Mi cuenta</a>
+  </nav>
+</header>
+
+<main>
+  <section class="card registro-wrap">
+    <div class="icono-grande">🧬</div>
+    <h1>Crear cuenta</h1>
+    <form onsubmit="event.preventDefault(); hacerRegistro();">
+      <label for="registro-username">Usuario</label>
+      <input type="text" id="registro-username" autocomplete="username" required maxlength="50" />
+      <label for="registro-password">Contraseña</label>
+      <div class="campo-password">
+        <input type="password" id="registro-password" autocomplete="new-password" required maxlength="100" />
+        <button type="button" class="boton-ojo" id="toggle-password" onclick="alternarPassword()" aria-label="Mostrar contraseña">👁</button>
+      </div>
+      <label class="opcion-validacion" for="validar-cliente">
+        <input type="checkbox" id="validar-cliente" checked />
+        <span>Validar formato del usuario en el navegador antes de enviar
+          <span class="nota-ilustrativa">(ilustrativo — el servidor valida siempre el formato, incluso con esto desactivado)</span>
+        </span>
+      </label>
+      <button class="primario" type="submit">Registrarme</button>
+    </form>
+    <p class="mensaje-error" id="registro-error"></p>
+    <p class="mensaje-exito" id="registro-exito"></p>
+
+    <ol class="pasos-hash" id="pasos-hash" style="display:none;"></ol>
+    <p class="pasos-nota" id="pasos-nota" style="display:none;"></p>
+
+    <details class="panel-respuesta">
+      <summary>Respuesta cruda del servidor</summary>
+      <pre id="registro-resultado">(sin peticiones aún)</pre>
+    </details>
+  </section>
+</main>
+
+<footer class="pie">Biblioteca Universidad de Manizales — uso interno</footer>
+
+<script>
+  const ALLOWLIST_USUARIO = /^[A-Za-z0-9._-]+$/;
+
+  function alternarPassword() {
+    const input = document.getElementById("registro-password");
+    const boton = document.getElementById("toggle-password");
+    const mostrando = input.type === "text";
+    input.type = mostrando ? "password" : "text";
+    boton.textContent = mostrando ? "👁" : "🙈";
+    boton.setAttribute("aria-label", mostrando ? "Mostrar contraseña" : "Ocultar contraseña");
+  }
+
+  function pintarPasos(pasoAPaso) {
+    const lista = document.getElementById("pasos-hash");
+    const nota = document.getElementById("pasos-nota");
+    lista.innerHTML = "";
+
+    const formatoCompleto =
+      "Posiciones  1-7   ($2b$12$) → algoritmo + costo (2b = versión de bcrypt · 12 = costo, 2¹²=4096 rondas)\n" +
+      "Posiciones  8-29  (22 car.) → sal aleatoria\n" +
+      "Posiciones 30-60  (31 car.) → hash resultante\n" +
+      "Total: 60 caracteres, todo junto, sin separadores entre las 3 partes";
+
+    const desglose = pasoAPaso["4_desglose_del_hash_completo"];
+    const pasos = [
+      ["Paso 0 — Formato completo de un hash bcrypt (siempre 60 caracteres)", formatoCompleto, "leyenda"],
+      ["Paso 1 — Contraseña recibida, en texto plano (bytes)", pasoAPaso["1_password_en_texto_plano"], false],
+      ["Paso 2 — Sal aleatoria generada: bcrypt.gensalt(rounds=12) → 29 caracteres ($2b$12$ + 22 de sal, todo junto)", pasoAPaso["2_sal_generada_bcrypt_gensalt_rounds12"], false],
+      ["Paso 3 — Hash completo: bcrypt.hashpw(password, sal) → 60 caracteres en total, esto es lo que se guarda en la BD", pasoAPaso["3_hash_completo_bcrypt_hashpw"], true],
+      ["Paso 4a — Caracteres 1 a 7: algoritmo + costo ($2b = versión de bcrypt · 12 = costo, 2¹² = 4096 rondas)", desglose["algoritmo_y_costo"], false],
+      ["Paso 4b — Caracteres 8 a 29 (22 caracteres): la SAL — debe coincidir exactamente con el paso 2", desglose["sal_embebida_22_chars"], false],
+      ["Paso 4c — Caracteres 30 a 60 (31 caracteres): el HASH resultante (contraseña + sal, mezcladas por bcrypt)", desglose["hash_resultante_31_chars"], false],
+    ];
+
+    for (const [etiqueta, valor, tipo] of pasos) {
+      const li = document.createElement("li");
+      if (tipo === true) li.className = "paso-destacado";
+      if (tipo === "leyenda") li.className = "paso-leyenda";
+      const spanLabel = document.createElement("span");
+      spanLabel.className = "paso-label";
+      spanLabel.textContent = etiqueta;
+      const spanValor = document.createElement("span");
+      spanValor.className = "paso-valor";
+      spanValor.textContent = valor;
+      li.appendChild(spanLabel);
+      li.appendChild(spanValor);
+      lista.appendChild(li);
+    }
+
+    lista.style.display = "flex";
+    nota.textContent = pasoAPaso["nota"] || "";
+    nota.style.display = "block";
+  }
+
+  async function hacerRegistro() {
+    const username = document.getElementById("registro-username").value;
+    const password = document.getElementById("registro-password").value;
+    const validarEnCliente = document.getElementById("validar-cliente").checked;
+    const salida = document.getElementById("registro-resultado");
+    const error = document.getElementById("registro-error");
+    const exito = document.getElementById("registro-exito");
+    const lista = document.getElementById("pasos-hash");
+    const nota = document.getElementById("pasos-nota");
+    error.classList.remove("visible");
+    exito.classList.remove("visible");
+    lista.style.display = "none";
+    nota.style.display = "none";
+
+    if (validarEnCliente && username !== "" && !ALLOWLIST_USUARIO.test(username)) {
+      error.textContent = "Formato de usuario inválido (solo letras, números, punto, guion y guion bajo). Nada se envió al servidor.";
+      error.classList.add("visible");
+      salida.textContent = "(bloqueado en el navegador — no se hizo ninguna petición; desmarca la casilla de arriba para ver qué hace el servidor con el mismo valor)";
+      return;
+    }
+
+    salida.textContent = "Enviando...";
+    try {
+      const resp = await fetch("/api/registro", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const datos = await resp.json();
+      salida.textContent = JSON.stringify(datos, null, 2);
+      if (datos.ok) {
+        exito.textContent = "Cuenta creada como " + datos.usuario.username + " (id " + datos.usuario.id + "). Ya puedes iniciar sesión con ella.";
+        exito.classList.add("visible");
+        pintarPasos(datos.paso_a_paso);
+      } else {
+        error.textContent = datos.mensaje || "No se pudo completar el registro.";
+        error.classList.add("visible");
+      }
+    } catch (err) {
+      salida.textContent = "Error de red: " + err;
+      error.textContent = "No se pudo contactar al servidor.";
+      error.classList.add("visible");
+    }
+  }
+</script>
+
+</body>
+</html>

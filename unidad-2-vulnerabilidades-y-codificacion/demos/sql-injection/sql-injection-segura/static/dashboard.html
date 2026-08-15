@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Biblioteca UM - Mi cuenta</title>
+<link rel="stylesheet" href="/static/estilo.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <a class="marca" href="/"><span class="icono">📚</span> Biblioteca UM</a>
+  <nav class="nav-links">
+    <a href="/">Inicio</a>
+    <a href="/registro">Registro</a>
+    <a href="/buscar">Catálogo</a>
+    <a href="/dashboard" class="activo">Mi cuenta</a>
+  </nav>
+</header>
+
+<main>
+  <section class="card bienvenida">
+    <div class="avatar-grande">👤</div>
+    <h1 id="saludo">Bienvenido</h1>
+    <p class="subt">Tu sesión está activa.</p>
+    <p class="id-usuario" id="id-usuario"></p>
+
+    <div class="acciones-dashboard">
+      <a class="primario" href="/buscar">Ir al catálogo</a>
+      <button class="secundario" onclick="cerrarSesion()">Cerrar sesión</button>
+    </div>
+
+    <details class="panel-respuesta">
+      <summary>Respuesta del servidor (login)</summary>
+      <pre id="login-resultado">(sin datos)</pre>
+    </details>
+  </section>
+</main>
+
+<footer class="pie">Biblioteca Universidad de Manizales — uso interno</footer>
+
+<script>
+  const sesionCruda = sessionStorage.getItem("sesion");
+  if (!sesionCruda) {
+    window.location.href = "/";
+  } else {
+    const sesion = JSON.parse(sesionCruda);
+    document.getElementById("saludo").textContent = "Hola, " + sesion.usuario.username;
+    document.getElementById("id-usuario").textContent = "ID de usuario: " + sesion.usuario.id;
+    document.getElementById("login-resultado").textContent = JSON.stringify(sesion.respuesta, null, 2);
+  }
+
+  function cerrarSesion() {
+    sessionStorage.removeItem("sesion");
+    window.location.href = "/";
+  }
+</script>
+
+</body>
+</html>

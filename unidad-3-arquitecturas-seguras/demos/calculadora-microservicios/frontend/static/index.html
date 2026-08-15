@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Calculadora</title>
+<link rel="stylesheet" href="/static/estilo.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="marca"><span class="icono">🧮</span> Calculadora</div>
+  <div class="variante" id="variante">conectando...</div>
+</header>
+
+<main>
+  <section class="card calculadora">
+    <h2>Calculadora</h2>
+    <p class="subt">
+      Evalúa de izquierda a derecha, sin precedencia de operadores —
+      igual que una calculadora física (<code>2 + 3 × 4 =</code> da
+      <code>20</code>, no <code>14</code>). Cada número y operación se
+      envía al servidor como un paso de <code>POST /api/expresion</code>.
+    </p>
+
+    <div class="pantalla">
+      <div class="pantalla-expresion" id="calc-expresion">&nbsp;</div>
+      <div class="pantalla-actual" id="calc-pantalla">0</div>
+    </div>
+
+    <div class="teclado">
+      <button class="tecla funcion" onclick="calcLimpiar()">C</button>
+      <button class="tecla funcion" onclick="calcBorrar()">⌫</button>
+      <button class="tecla funcion" disabled></button>
+      <button class="tecla operador" onclick="calcOperador('division')">÷</button>
+
+      <button class="tecla" onclick="calcDigito('7')">7</button>
+      <button class="tecla" onclick="calcDigito('8')">8</button>
+      <button class="tecla" onclick="calcDigito('9')">9</button>
+      <button class="tecla operador" onclick="calcOperador('multiplicacion')">×</button>
+
+      <button class="tecla" onclick="calcDigito('4')">4</button>
+      <button class="tecla" onclick="calcDigito('5')">5</button>
+      <button class="tecla" onclick="calcDigito('6')">6</button>
+      <button class="tecla operador" onclick="calcOperador('resta')">−</button>
+
+      <button class="tecla" onclick="calcDigito('1')">1</button>
+      <button class="tecla" onclick="calcDigito('2')">2</button>
+      <button class="tecla" onclick="calcDigito('3')">3</button>
+      <button class="tecla operador" onclick="calcOperador('suma')">+</button>
+
+      <button class="tecla ancha" onclick="calcDigito('0')">0</button>
+      <button class="tecla" onclick="calcDigito('.')">.</button>
+      <button class="tecla igual" onclick="calcIgual()">=</button>
+    </div>
+
+    <p class="resultado" id="calc-mensaje"></p>
+    <ol class="pasos" id="expr-pasos"></ol>
+    <details class="panel-respuesta">
+      <summary>Respuesta del servidor</summary>
+      <pre id="expr-crudo">(sin peticiones aún)</pre>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2>Historial (base de datos de ilustración)</h2>
+    <div class="fila-botones">
+      <button onclick="cargarHistorial()">Actualizar historial</button>
+    </div>
+    <table class="tabla-historial" id="tabla-historial">
+      <thead>
+        <tr><th>#</th><th>Tipo</th><th>Operandos</th><th>Resultado</th><th>Cuándo</th></tr>
+      </thead>
+      <tbody id="historial-filas"></tbody>
+    </table>
+  </section>
+</main>
+
+<footer class="pie">Unidad 3 — Arquitecturas comunes: demo de calculadora</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

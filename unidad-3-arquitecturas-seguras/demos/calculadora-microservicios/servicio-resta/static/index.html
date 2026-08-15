@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Servicio aislado</title>
+<link rel="stylesheet" href="/static/estilo.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="marca"><span class="icono">🔧</span> Servicio aislado</div>
+  <div class="variante" id="variante">conectando...</div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Probar este servicio directamente</h2>
+    <p class="subt">
+      Este contenedor solo sabe hacer UNA operación — recibe dos números
+      por <code>POST /operar</code> y devuelve el resultado. No conoce al
+      orquestador, a los otros 3 servicios, ni a la base de datos: para
+      él, esta petición podría venir de cualquier parte.
+    </p>
+    <div class="fila-inputs">
+      <label>a <input type="number" id="op-a" value="5" /></label>
+      <label>b <input type="number" id="op-b" value="3" /></label>
+    </div>
+    <div class="fila-botones">
+      <button onclick="calcular()">Calcular</button>
+    </div>
+    <p class="resultado" id="op-resultado"></p>
+    <details class="panel-respuesta">
+      <summary>Respuesta del servidor</summary>
+      <pre id="op-crudo">(sin peticiones aún)</pre>
+    </details>
+  </section>
+</main>
+
+<footer class="pie">Unidad 3 — Arquitecturas comunes: servicio de operación aislado</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+name: calculadora-02-micro-servicios
+
+services:
+  frontend:
+    build: ./frontend
+    container_name: calc02-frontend
+    ports:
+      - "9002:8000"
+    environment:
+      ORQUESTADOR_URL: http://orquestador:8000
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+    depends_on:
+      orquestador:
+        condition: service_started
+    restart: unless-stopped
+
+  orquestador:
+    build: ./orquestador
+    container_name: calc02-orquestador
+    ports:
+      - "9020:8000"   # http://localhost:9020 -- solo para pruebas directas de la API, sin pasar por "frontend"
+    environment:
+      URL_SUMA: http://servicio-suma:8000
+      URL_RESTA: http://servicio-resta:8000
+      URL_MULTIPLICACION: http://servicio-multiplicacion:8000
+      URL_DIVISION: http://servicio-division:8000
+      DB_HOST: db
+      DB_USER: app_user
+      DB_PASSWORD: app_password
+      DB_NAME: calculadora
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+    depends_on:
+      db:
+        condition: service_healthy
+      servicio-suma:
+        condition: service_started
+      servicio-resta:
+        condition: service_started
+      servicio-multiplicacion:
+        condition: service_started
+      servicio-division:
+        condition: service_started
+    restart: unless-stopped
+
+  servicio-suma:
+    build: ./servicio-suma
+    container_name: calc02-servicio-suma
+    ports:
+      - "9021:8000"   # http://localhost:9021 -- solo para pruebas aisladas
+    environment:
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+
+  servicio-resta:
+    build: ./servicio-resta
+    container_name: calc02-servicio-resta
+    ports:
+      - "9022:8000"   # http://localhost:9022
+    environment:
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+
+  servicio-multiplicacion:
+    build: ./servicio-multiplicacion
+    container_name: calc02-servicio-multiplicacion
+    ports:
+      - "9023:8000"   # http://localhost:9023
+    environment:
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+
+  servicio-division:
+    build: ./servicio-division
+    container_name: calc02-servicio-division
+    ports:
+      - "9024:8000"   # http://localhost:9024
+    environment:
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+
+  db:
+    image: mysql:8.4
+    container_name: calc02-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: calculadora
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_password
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - calc02_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    container_name: calc02-phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_USER: app_user
+      PMA_PASSWORD: app_password
+    ports:
+      - "9013:80"   # http://localhost:9013
+    depends_on:
+      db:
+        condition: service_healthy
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: calc02-zipkin
+    ports:
+      - "9019:9411"   # http://localhost:9019 (9411 es el puerto INTERNO
+
+volumes:
+  calc02_mysql_data:

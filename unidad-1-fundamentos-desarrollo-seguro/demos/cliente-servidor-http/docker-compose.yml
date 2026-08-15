@@ -1,0 +1,47 @@
+services:
+web:
+    build: .
+    container_name: ul-cliente-servidor-web
+    ports:
+      - "8080:8080"
+    Environment:
+        DB_HOST: db
+        DB_USER: app_user
+        DB_PASSWORD: app_password
+        DB_NAME: directorio_clientes
+
+        depends_on:
+          db:
+            condition: service_healthy
+
+db:
+    image: mysql:8.4
+    container_name: ul-cliente-servidor-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: directorio_clientes
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_password
+        - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+        -ul_cliente-servidor-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 5    
+
+phpmyadmin:
+    image: phpmyadmin:5.2
+    container_name: ul-cliente-servidor-phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_USER: app_user
+      PMA_PASSWORD: app_password
+    ports:
+      - "8081:80"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  ul_cliente-servidor-db-data:

@@ -1,0 +1,25 @@
+meta {
+    name: 1. Crear cliente
+    type: http
+    seq: 1
+}
+
+post {
+    url: {{baseUrl}}/api/cliente
+    body: json
+    auth: none
+}
+
+body:json {
+    {
+        "nombre": "Alejandro Hernández",
+        "correo": "diegoahernandez26@gmail.com",
+        "categoria": 2
+    }
+}
+
+docs {
+    POST: el cliente ENVIA datos nuevos para que el servidor los cree.
+
+    Respuesta esperada: 201 Created: indica que el cliente nuevo ha sido creado.
+}

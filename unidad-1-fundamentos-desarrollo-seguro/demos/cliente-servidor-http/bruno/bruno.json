@@ -1,0 +1,9 @@
+{
+    "version": "1",
+    "name": "Directorio de clientes (Unidad 1 - cliente-servidor-http)",
+    "type": "collection",
+    "ignore": [
+        "node_modules",
+        ".git"
+    ]
+}

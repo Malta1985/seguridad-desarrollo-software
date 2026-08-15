@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Aplicación Cliente-Servidor HTTP</title>
+	<style>
+		body{font-family:Segoe UI,Arial,sans-serif;margin:24px;background:#f7f9fc;color:#111}
+		h1{margin-bottom:8px}
+		.card{background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(16,24,40,0.06);margin-bottom:16px}
+		label{display:block;margin:8px 0 4px;font-weight:600}
+		input[type="text"], input[type="email"]{width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px}
+		button{background:#2563eb;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;margin-top:8px}
+		button.secondary{background:#6b7280}
+		pre{background:#0f172a;color:#e6eef8;padding:12px;border-radius:6px;overflow:auto}
+		.row{display:flex;gap:12px}
+		.col{flex:1}
+	</style>
+</head>
+<body>
+	<h1>Aplicación Cliente-Servidor</h1>
+
+	<section class="card">
+		<h2>Crear cliente</h2>
+		<form id="createForm">
+			<label for="name">Nombre</label>
+			<input id="name" name="name" type="text" required />
+			<label for="email">Email</label>
+			<input id="email" name="email" type="email" required />
+			<div class="row">
+				<div class="col"><button type="submit">Crear</button></div>
+				<div class="col"><button type="button" id="listBtn" class="secondary">Listar clientes</button></div>
+			</div>
+		</form>
+	</section>
+
+	<section class="card">
+		<h2>Obtener cliente por ID</h2>
+		<div class="row">
+			<input id="clientId" type="text" placeholder="ID del cliente" />
+			<button id="getBtn" class="secondary">Obtener</button>
+		</div>
+	</section>
+
+	<section class="card">
+		<h2>Resultados</h2>
+		<div id="results"><em>No hay resultados aún.</em></div>
+	</section>
+
+	<script>
+		const resultsEl = document.getElementById('results');
+
+		function showJSON(obj){
+			resultsEl.innerHTML = '<pre>'+JSON.stringify(obj, null, 2)+'</pre>';
+		}
+
+		async function listClients(){
+			try{
+				const res = await fetch('/clientes');
+				const data = await res.json();
+				showJSON(data);
+			}catch(err){
+				showJSON({error: String(err)});
+			}
+		}
+
+		async function getClient(id){
+			try{
+				const res = await fetch(`/clientes/${encodeURIComponent(id)}`);
+				if(!res.ok) throw new Error('Estado '+res.status);
+				const data = await res.json();
+				showJSON(data);
+			}catch(err){
+				showJSON({error: String(err)});
+			}
+		}
+
+		async function createClient(payload){
+			try{
+				const res = await fetch('/clientes', {
+					method:'POST',
+					headers:{'Content-Type':'application/json'},
+					body:JSON.stringify(payload)
+				});
+				const data = await res.json();
+				showJSON(data);
+			}catch(err){
+				showJSON({error: String(err)});
+			}
+		}
+
+		document.getElementById('createForm').addEventListener('submit', e=>{
+			e.preventDefault();
+			const name = document.getElementById('name').value.trim();
+			const email = document.getElementById('email').value.trim();
+			if(!name || !email){ showJSON({error:'Nombre y email requeridos'}); return }
+			createClient({name,email});
+		});
+
+		document.getElementById('listBtn').addEventListener('click', ()=>listClients());
+		document.getElementById('getBtn').addEventListener('click', ()=>{
+			const id = document.getElementById('clientId').value.trim();
+			if(!id){ showJSON({error:'ID requerido'}); return }
+			getClient(id);
+		});
+
+		// carga inicial: intenta listar
+		// listClients();
+	</script>
+
+</body>
+</html>
